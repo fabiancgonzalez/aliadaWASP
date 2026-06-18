@@ -3,7 +3,7 @@ import { FaEnvelope, FaInstagram, FaWhatsapp } from "react-icons/fa6";
 
 const email = "ali_vallej13@hotmail.com";
 const instagramHandle = "ali_vallej13";
-const whatsappNumber = "54935133707249";
+const whatsappNumber = "5493513707249";
 const whatsappMessage = encodeURIComponent(
   "Hola! Quiero consultar por stickers de Aliada."
 );

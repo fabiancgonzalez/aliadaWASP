@@ -14,7 +14,7 @@ const createCheckout = (array: ProductTypes[], totalPrice: Number) => {
   const textoFinal = `¡Hola Aliada!, quería pedirte: %0A${texto.join(
     "%0A"
   )} %0A %0A Total: $${totalPrice}%0A ¡Muchas Gracias!`;
-  window.location.href = "https://wa.me/5493513729188?text=" + textoFinal;
+  window.location.href = "https://wa.me/5493513707249?text=" + textoFinal;
   console.log(textoFinal);
   return textoFinal;
 };
