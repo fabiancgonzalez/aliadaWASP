@@ -94,7 +94,7 @@ function ProductSection() {
     quantity: number;
   }) => {
     return (
-      <li className="bg-slate-950 px-4 py-2 flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-3 rounded-xl">
+      <li className="bg-[#ffd6b3] text-[#6e2e00] border border-[#f1b27a] px-4 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-3 rounded-xl">
         <img
           src={image}
           alt={`Product image on cart of ${title}`}
@@ -105,10 +105,27 @@ function ProductSection() {
             {title}
           </h1>
           <span>${price}</span>
-          <span>Cantidad: {quantity} </span>
+          <div className="flex items-center gap-2 mt-1">
+            <span>Cantidad:</span>
+            <button
+              type="button"
+              className="h-7 w-7 rounded-full bg-[#8a3d00] text-[#fff3e6] font-bold"
+              onClick={() => decreaseQuantity(title)}
+            >
+              -
+            </button>
+            <span className="w-6 text-center font-semibold">{quantity}</span>
+            <button
+              type="button"
+              className="h-7 w-7 rounded-full bg-[#8a3d00] text-[#fff3e6] font-bold"
+              onClick={() => increaseQuantity(title)}
+            >
+              +
+            </button>
+          </div>
         </div>
         <button
-          className="bg-red-500 px-4 py-1 rounded-full w-full sm:w-auto"
+          className="bg-red-500 text-white px-4 py-1 rounded-full w-full sm:w-auto"
           onClick={() => deleteCartItem(title)}
         >
           Quitar
@@ -149,8 +166,7 @@ function ProductSection() {
             <CheckoutButton
               array={cart}
               totalPrice={totalPrice() || 0}
-              onIncrease={increaseQuantity}
-              onDecrease={decreaseQuantity}
+              onCartUpdate={setCart}
             />
           ) : null}
         </section>
