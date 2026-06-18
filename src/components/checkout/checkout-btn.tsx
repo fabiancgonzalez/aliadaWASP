@@ -1,9 +1,9 @@
 "use client";
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { SiWhatsapp } from "react-icons/si";
 import { ProductTypes } from "../product/types";
 
-const createCheckout = (array: ProductTypes[], totalPrice: Number) => {
+const createCheckout = (array: ProductTypes[], totalPrice: number) => {
   const texto: Array<String> = [];
 
   array.forEach((item) => {
@@ -22,17 +22,96 @@ const createCheckout = (array: ProductTypes[], totalPrice: Number) => {
 function CheckoutButton({
   array,
   totalPrice,
+  onIncrease,
+  onDecrease,
 }: {
   array: ProductTypes[];
-  totalPrice: Number;
+  totalPrice: number;
+  onIncrease: (title: string) => void;
+  onDecrease: (title: string) => void;
 }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const hasProducts = useMemo(() => array.length > 0, [array]);
+
   return (
-    <button
-      className="bg-green-700 w-[80%] rounded-full shadow-2xl flex items-center py-2 justify-center text-md gap-4 underline underline-offset-4"
-      onClick={() => createCheckout(array, totalPrice)}
-    >
-      <SiWhatsapp className="w-5 h-5" /> Confirmar pedido
-    </button>
+    <>
+      <button
+        className="bg-green-700 w-[80%] rounded-full shadow-2xl flex items-center py-2 justify-center text-md gap-4 underline underline-offset-4"
+        onClick={() => setIsModalOpen(true)}
+      >
+        <SiWhatsapp className="w-5 h-5" /> Confirmar pedido
+      </button>
+
+      {isModalOpen ? (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-3">
+          <div className="w-full max-w-lg rounded-2xl bg-[#fff3e6] p-4 sm:p-6 text-[#6e2e00] border border-[#f1b27a]">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#8a3d00]">
+              Confirmar pedido
+            </h2>
+
+            <ul className="mt-4 max-h-[45vh] overflow-y-auto space-y-2">
+              {array.map((item) => (
+                <li
+                  key={item.title}
+                  className="rounded-xl bg-[#ffd6b3] border border-[#f1b27a] p-3"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold truncate">{item.title}</p>
+                      <p className="text-sm">${item.price} c/u</p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        className="h-8 w-8 rounded-full bg-[#8a3d00] text-[#fff3e6] font-bold"
+                        onClick={() => onDecrease(item.title)}
+                      >
+                        -
+                      </button>
+                      <span className="w-7 text-center font-semibold">
+                        {item.quantity}
+                      </span>
+                      <button
+                        type="button"
+                        className="h-8 w-8 rounded-full bg-[#8a3d00] text-[#fff3e6] font-bold"
+                        onClick={() => onIncrease(item.title)}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-4 flex items-center justify-between font-bold">
+              <span>Total</span>
+              <span>${totalPrice}</span>
+            </div>
+
+            <div className="mt-5 flex flex-col sm:flex-row gap-2 sm:justify-end">
+              <button
+                type="button"
+                className="rounded-full border border-[#a74700] px-5 py-2 font-semibold"
+                onClick={() => setIsModalOpen(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="rounded-full bg-green-700 text-white px-5 py-2 font-semibold disabled:opacity-60"
+                disabled={!hasProducts}
+                onClick={() => createCheckout(array, totalPrice)}
+              >
+                Enviar por WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }
 

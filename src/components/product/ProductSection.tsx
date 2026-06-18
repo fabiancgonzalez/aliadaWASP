@@ -11,18 +11,25 @@ function ProductSection() {
   const [cart, setCart] = useState<ProductTypes[]>([]);
   const [productsList, setProductsList] = useState<ProductTypes[]>([]);
   const [cartState, setCartState] = useState(false);
-  const addToCart = (product: ProductTypes) => {
-    setCart((prev) => [...prev, product]);
-    const productIndex = cart.findIndex(
-      (element) => element.title === product.title
-    );
 
-    // Si productIndex es diferente a -1,
-    if (productIndex !== -1) {
-      const newCart = [...cart];
-      newCart[productIndex].quantity += 1;
-      setCart(newCart);
-    }
+  const addToCart = (product: ProductTypes) => {
+    setCart((prev) => {
+      const productIndex = prev.findIndex(
+        (element) => element.title === product.title
+      );
+
+      if (productIndex === -1) {
+        return [...prev, product];
+      }
+
+      const newCart = [...prev];
+      newCart[productIndex] = {
+        ...newCart[productIndex],
+        quantity: newCart[productIndex].quantity + 1,
+      };
+
+      return newCart;
+    });
   };
 
   const totalPrice = () => {
@@ -39,6 +46,26 @@ function ProductSection() {
       (element) => element.title !== item
     );
     setCart(filteredArray);
+  };
+
+  const increaseQuantity = (title: string) => {
+    setCart((prev) =>
+      prev.map((item) =>
+        item.title === title ? { ...item, quantity: item.quantity + 1 } : item
+      )
+    );
+  };
+
+  const decreaseQuantity = (title: string) => {
+    setCart((prev) =>
+      prev
+        .map((item) =>
+          item.title === title
+            ? { ...item, quantity: Math.max(0, item.quantity - 1) }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
   };
 
   useEffect(() => {
@@ -67,21 +94,21 @@ function ProductSection() {
     quantity: number;
   }) => {
     return (
-      <li className="bg-slate-950 px-4 py-2 flex items-center justify-between w-full gap-4 rounded-xl">
+      <li className="bg-slate-950 px-4 py-2 flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-3 rounded-xl">
         <img
           src={image}
           alt={`Product image on cart of ${title}`}
-          className="w-14 h-14 object-cover rounded-full"
+          className="w-14 h-14 object-cover rounded-full shrink-0"
         />
-        <div className="flex flex-col items-start justify-between">
-          <h1 className="overflow-ellipsis font-semibold w-[20ch] whitespace-nowrap overflow-hidden">
+        <div className="flex flex-col items-start justify-between min-w-0 w-full">
+          <h1 className="overflow-ellipsis font-semibold w-full sm:w-[20ch] whitespace-nowrap overflow-hidden">
             {title}
           </h1>
           <span>${price}</span>
           <span>Cantidad: {quantity} </span>
         </div>
         <button
-          className="bg-red-500 px-4 py-1 rounded-full"
+          className="bg-red-500 px-4 py-1 rounded-full w-full sm:w-auto"
           onClick={() => deleteCartItem(title)}
         >
           Quitar
@@ -93,14 +120,14 @@ function ProductSection() {
   return (
     <>
       <button
-        className="fixed bottom-10 bg-[#a74700] backdrop-blur-xl px-14 py-2 rounded-full text-white font-semibold flex items-center justify-center gap-4 border-2 border-[#ffd6b3]"
+        className="fixed bottom-10 right-4 z-40 bg-[#a74700] backdrop-blur-xl px-6 sm:px-14 py-2 rounded-full text-white font-semibold flex items-center justify-center gap-4 border-2 border-[#ffd6b3]"
         onClick={() => setCartState(!cartState)}
       >
         {cart.length}<FaCartShopping className="w-6 h-6" />
       </button>
       {cartState ? (
-        <section className="bg-[#6e2e00] text-[#fff3e6] flex flex-col items-center justify-between fixed -top-2 left-0 p-5 rounded-2xl min-w-96 gap-4 border border-[#f1b27a]">
-          <ul className="flex flex-col items-center justify-start gap-2 overflow-y-auto h-[50vh]">
+        <section className="z-30 bg-[#6e2e00] text-[#fff3e6] flex flex-col items-center justify-between fixed top-24 left-1/2 -translate-x-1/2 md:left-6 md:translate-x-0 p-4 sm:p-5 rounded-2xl w-[calc(100vw-1rem)] max-w-md md:min-w-96 gap-4 border border-[#f1b27a] max-h-[70vh]">
+          <ul className="flex flex-col items-center justify-start gap-2 overflow-y-auto w-full">
             {cart.map((item, key) => {
               const { title, price, image, quantity } = item as ProductTypes;
               return (
@@ -119,7 +146,12 @@ function ProductSection() {
             <span className="text-md">$ {totalPrice() || 0}</span>
           </div>
           {cart.length !== 0 ? (
-            <CheckoutButton array={cart} totalPrice={totalPrice() || 0} />
+            <CheckoutButton
+              array={cart}
+              totalPrice={totalPrice() || 0}
+              onIncrease={increaseQuantity}
+              onDecrease={decreaseQuantity}
+            />
           ) : null}
         </section>
       ) : null}
