@@ -14,6 +14,7 @@ const fetchImage = async (url: string) => {
       "User-Agent": "Mozilla/5.0",
     },
     cache: "no-store",
+    
   });
 
   if (!response.ok) {

@@ -1,210 +1,267 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
-import { ProductTypes } from "./types";
-import Product from "../../components/product/Product";
-import React, { useEffect, useState } from "react";
+
+import { useEffect, useState } from "react";
+import {
+  FaArrowRight,
+  FaBagShopping,
+  FaMinus,
+  FaPlus,
+  FaRotateRight,
+  FaTrash,
+  FaXmark,
+} from "react-icons/fa6";
+
 import { data } from "../../api";
 import CheckoutButton from "../checkout/checkout-btn";
-import { FaCartShopping } from "react-icons/fa6";
+import Product from "./Product";
+import { ProductTypes } from "./types";
 
-function ProductSection() {
+const CART_STORAGE_KEY = "aliada-cart:v1";
+
+const formatPrice = (price: number) =>
+  new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
+    maximumFractionDigits: 0,
+  }).format(price);
+
+export default function ProductSection() {
   const [cart, setCart] = useState<ProductTypes[]>([]);
-  const [productsList, setProductsList] = useState<ProductTypes[]>([]);
-  const [cartState, setCartState] = useState(false);
+  const [products, setProducts] = useState<ProductTypes[]>([]);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [cartReady, setCartReady] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [requestVersion, setRequestVersion] = useState(0);
+  const [activeCategory, setActiveCategory] = useState("Todos");
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(CART_STORAGE_KEY);
+      const parsed = stored ? JSON.parse(stored) : [];
+      if (Array.isArray(parsed)) setCart(parsed);
+    } catch {
+      localStorage.removeItem(CART_STORAGE_KEY);
+    } finally {
+      setCartReady(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!cartReady) return;
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    } catch {
+      // Keep the cart functional for this session when storage is unavailable.
+    }
+  }, [cart, cartReady]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+    setLoading(true);
+    setError(false);
+    data(controller.signal)
+      .then((result) => {
+        if (active) setProducts(result);
+      })
+      .catch((fetchError) => {
+        if (active && fetchError.name !== "AbortError") setError(true);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [requestVersion]);
+
+  const categories = [
+    "Todos",
+    ...Array.from(
+      new Map(
+        products.map((product) => [
+          product.category.toLocaleLowerCase("es"),
+          product.category,
+        ])
+      ).values()
+    ),
+  ];
+  const visibleProducts =
+    activeCategory === "Todos"
+      ? products
+      : products.filter(
+          (product) =>
+            product.category.toLocaleLowerCase("es") ===
+            activeCategory.toLocaleLowerCase("es")
+        );
+  const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
+  const totalPrice = cart.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
 
   const addToCart = (product: ProductTypes) => {
-    setCart((prev) => {
-      const productIndex = prev.findIndex(
-        (element) => element.title === product.title
+    setCart((current) => {
+      const existing = current.find((item) => item.title === product.title);
+      if (!existing) return [...current, product];
+      return current.map((item) =>
+        item.title === product.title
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
       );
-
-      if (productIndex === -1) {
-        return [...prev, product];
-      }
-
-      const newCart = [...prev];
-      newCart[productIndex] = {
-        ...newCart[productIndex],
-        quantity: newCart[productIndex].quantity + 1,
-      };
-
-      return newCart;
     });
+    setCartOpen(true);
   };
 
-  const totalPrice = () => {
-    if (cart.length == 0) return;
-    const cartTotalPrice = cart.reduce(
-      (acc, item) => acc + item.price * item.quantity,
-      0
-    );
-    return cartTotalPrice || 0;
-  };
-
-  const deleteCartItem = (item: string) => {
-    const filteredArray: ProductTypes[] = cart.filter(
-      (element) => element.title !== item
-    );
-    setCart(filteredArray);
-  };
-
-  const increaseQuantity = (title: string) => {
-    setCart((prev) =>
-      prev.map((item) =>
-        item.title === title ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
-  };
-
-  const decreaseQuantity = (title: string) => {
-    setCart((prev) =>
-      prev
+  const changeQuantity = (title: string, change: number) => {
+    setCart((current) =>
+      current
         .map((item) =>
           item.title === title
-            ? { ...item, quantity: Math.max(0, item.quantity - 1) }
+            ? { ...item, quantity: item.quantity + change }
             : item
         )
         .filter((item) => item.quantity > 0)
     );
   };
 
-  useEffect(() => {
-    const ProductMap = async () => {
-      const productsList = await data();
-      return productsList;
-    };
-
-    ProductMap()
-      .then((data) => {
-        setProductsList(data);
-      })
-      .catch((error) => console.log(error));
-
-  }, []);
-
-  const CartItemComponent = ({
-    title,
-    image,
-    price,
-    quantity,
-  }: {
-    title: string;
-    image: string;
-    price: number;
-    quantity: number;
-  }) => {
-    return (
-      <li className="bg-[#ffd6b3] text-[#6e2e00] border border-[#f1b27a] px-4 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-3 rounded-xl">
-        <img
-          src={image}
-          alt={`Product image on cart of ${title}`}
-          className="w-14 h-14 object-cover rounded-full shrink-0"
-        />
-        <div className="flex flex-col items-start justify-between min-w-0 w-full">
-          <h1 className="overflow-ellipsis font-semibold w-full sm:w-[20ch] whitespace-nowrap overflow-hidden">
-            {title}
-          </h1>
-          <span>${price}</span>
-          <div className="flex items-center gap-2 mt-1">
-            <span>Cantidad:</span>
-            <button
-              type="button"
-              className="h-7 w-7 rounded-full bg-[#8a3d00] text-[#fff3e6] font-bold"
-              onClick={() => decreaseQuantity(title)}
-            >
-              -
-            </button>
-            <span className="w-6 text-center font-semibold">{quantity}</span>
-            <button
-              type="button"
-              className="h-7 w-7 rounded-full bg-[#8a3d00] text-[#fff3e6] font-bold"
-              onClick={() => increaseQuantity(title)}
-            >
-              +
-            </button>
-          </div>
-        </div>
-        <button
-          className="bg-red-500 text-white px-4 py-1 rounded-full w-full sm:w-auto"
-          onClick={() => deleteCartItem(title)}
-        >
-          Quitar
-        </button>
-      </li>
-    );
-  };
-
   return (
-    <>
-      <button
-        className="fixed bottom-10 right-4 z-40 bg-[#a74700] backdrop-blur-xl px-6 sm:px-14 py-2 rounded-full text-white font-semibold flex items-center justify-center gap-4 border-2 border-[#ffd6b3]"
-        onClick={() => setCartState(!cartState)}
-      >
-        {cart.length}<FaCartShopping className="w-6 h-6" />
-      </button>
-      {cartState ? (
-        <section className="z-30 bg-[#6e2e00] text-[#fff3e6] flex flex-col items-center justify-between fixed top-24 left-1/2 -translate-x-1/2 md:left-6 md:translate-x-0 p-4 sm:p-5 rounded-2xl w-[calc(100vw-1rem)] max-w-md md:min-w-96 gap-4 border border-[#f1b27a] max-h-[70vh]">
-          <ul className="flex flex-col items-center justify-start gap-2 overflow-y-auto w-full">
-            {cart.map((item, key) => {
-              const { title, price, image, quantity } = item as ProductTypes;
-              return (
-                <CartItemComponent
-                  key={key}
-                  title={title}
-                  price={price}
-                  image={image}
-                  quantity={quantity}
-                ></CartItemComponent>
-              );
-            })}
-          </ul>
-          <div className="flex items-center justify-between w-full px-4 py-2 font-semibold">
-            <span className="text-md">Total:</span>
-            <span className="text-md">$ {totalPrice() || 0}</span>
-          </div>
-          {cart.length !== 0 ? (
-            <CheckoutButton
-              array={cart}
-              totalPrice={totalPrice() || 0}
-              onCartUpdate={setCart}
-            />
-          ) : null}
-        </section>
-      ) : null}
+    <section id="catalogo" className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <div className="flex flex-col justify-between gap-6 border-b border-ink/20 pb-8 md:flex-row md:items-end">
+        <div>
+          <p className="text-sm font-bold uppercase text-clay">Coleccion actual</p>
+          <h2 className="font-display text-4xl font-semibold text-ink sm:text-5xl">
+            Stickers para hacer tuyo lo cotidiano.
+          </h2>
+        </div>
+        <p className="max-w-md text-lg text-ink/70">
+          Diseños impresos con cuidado para cuadernos, regalos, marcas y todo lo que quieras personalizar.
+        </p>
+      </div>
 
-      <article className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-        {productsList &&
-          productsList.map((product, key) => {
-            const { title, category, price, image } = product as ProductTypes;
+      <div className="my-8 flex gap-2 overflow-x-auto pb-2" aria-label="Filtrar por categoria">
+        {categories.map((category) => (
+          <button
+            key={category}
+            type="button"
+            aria-pressed={activeCategory === category}
+            className={`whitespace-nowrap border px-4 py-2 text-sm font-bold transition-colors ${
+              activeCategory === category
+                ? "border-ink bg-ink text-paper"
+                : "border-ink/25 text-ink hover:border-clay hover:text-clay"
+            }`}
+            onClick={() => setActiveCategory(category)}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
 
-            return (
-              <Product
-                key={key}
-                title={title}
-                category={category}
-                price={price}
-                image={image}
+      {loading ? (
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" aria-label="Cargando productos">
+          {Array.from({ length: 8 }, (_, index) => (
+            <div key={index} className="aspect-[3/4] animate-pulse bg-ink/10" />
+          ))}
+        </div>
+      ) : error ? (
+        <div role="alert" className="border border-clay bg-clay/10 p-8 text-center">
+          <p className="font-display text-2xl font-semibold">No pudimos cargar el catalogo.</p>
+          <button
+            type="button"
+            className="mt-4 inline-flex items-center gap-2 font-bold text-clay"
+            onClick={() => setRequestVersion((version) => version + 1)}
+          >
+            <FaRotateRight aria-hidden="true" /> Reintentar
+          </button>
+        </div>
+      ) : (
+        <div className="product-grid grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {visibleProducts.map((product) => (
+            <Product key={product.id ?? product.title} {...product}>
+              <button
+                type="button"
+                className="flex min-h-11 w-full items-center justify-between border-t border-ink/20 pt-4 font-bold text-ink transition-colors hover:text-clay"
+                onClick={() => addToCart({ ...product, quantity: 1 })}
               >
-                <button
-                  className="w-full bg-[#a74700] text-[#fff3e6] px-4 py-2 rounded-md hover:bg-[#8a3d00] transition-all buttoneitor"
-                  onClick={() =>
-                    addToCart({
-                      title: title,
-                      price: price,
-                      image: image,
-                      quantity: 1,
-                      category: category,
-                    })
-                  }
-                >
-                  Añadir al carrito
-                </button>
-              </Product>
-            );
-          })}
-      </article>
-    </>
+                Agregar al carrito <FaArrowRight aria-hidden="true" />
+              </button>
+            </Product>
+          ))}
+        </div>
+      )}
+
+      <button
+        type="button"
+        aria-label={`Abrir carrito con ${itemCount} productos`}
+        className="fixed bottom-5 right-5 z-40 flex h-14 items-center gap-3 bg-ink px-5 font-bold text-paper shadow-xl transition-transform hover:-translate-y-1"
+        onClick={() => setCartOpen(true)}
+      >
+        <FaBagShopping className="h-5 w-5" aria-hidden="true" />
+        <span>{itemCount}</span>
+      </button>
+
+      {cartOpen ? (
+        <div className="fixed inset-0 z-50 flex justify-end bg-ink/55" role="presentation" onMouseDown={() => setCartOpen(false)}>
+          <aside
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cart-title"
+            className="flex h-full w-full max-w-md flex-col bg-paper shadow-2xl"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <header className="flex items-center justify-between border-b border-ink/20 p-5">
+              <div>
+                <p className="text-xs font-bold uppercase text-clay">Tu seleccion</p>
+                <h2 id="cart-title" className="font-display text-3xl font-semibold">Carrito</h2>
+              </div>
+              <button type="button" aria-label="Cerrar carrito" className="grid h-10 w-10 place-items-center border border-ink/20 hover:bg-ink hover:text-paper" onClick={() => setCartOpen(false)}>
+                <FaXmark className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </header>
+
+            {cart.length ? (
+              <>
+                <ul className="flex-1 overflow-y-auto p-5">
+                  {cart.map((item) => (
+                    <li key={item.title} className="grid grid-cols-[64px_1fr_auto] gap-4 border-b border-ink/15 py-4">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={item.image} alt="" className="h-16 w-16 object-cover" />
+                      <div className="min-w-0">
+                        <p className="truncate font-bold">{item.title}</p>
+                        <p className="text-sm text-ink/65">{formatPrice(item.price)}</p>
+                        <div className="mt-2 flex items-center gap-2">
+                          <button type="button" aria-label={`Quitar una unidad de ${item.title}`} className="grid h-8 w-8 place-items-center border border-ink/20" onClick={() => changeQuantity(item.title, -1)}><FaMinus aria-hidden="true" /></button>
+                          <span className="w-6 text-center font-bold">{item.quantity}</span>
+                          <button type="button" aria-label={`Agregar una unidad de ${item.title}`} className="grid h-8 w-8 place-items-center border border-ink/20" onClick={() => changeQuantity(item.title, 1)}><FaPlus aria-hidden="true" /></button>
+                        </div>
+                      </div>
+                      <button type="button" aria-label={`Eliminar ${item.title}`} className="h-9 w-9 text-clay" onClick={() => setCart((current) => current.filter((product) => product.title !== item.title))}><FaTrash aria-hidden="true" /></button>
+                    </li>
+                  ))}
+                </ul>
+                <footer className="border-t border-ink/20 p-5">
+                  <div className="mb-5 flex items-baseline justify-between">
+                    <span className="text-sm font-bold uppercase">Total</span>
+                    <span className="font-display text-3xl font-semibold">{formatPrice(totalPrice)}</span>
+                  </div>
+                  <CheckoutButton array={cart} />
+                  <p className="mt-3 text-center text-xs text-ink/55">Pago seguro procesado en Mercado Pago.</p>
+                </footer>
+              </>
+            ) : (
+              <div className="grid flex-1 place-items-center p-8 text-center">
+                <div>
+                  <FaBagShopping className="mx-auto h-8 w-8 text-clay" aria-hidden="true" />
+                  <p className="mt-4 font-display text-2xl font-semibold">Tu carrito esta vacio</p>
+                  <button type="button" className="mt-3 font-bold text-clay" onClick={() => setCartOpen(false)}>Explorar la coleccion</button>
+                </div>
+              </div>
+            )}
+          </aside>
+        </div>
+      ) : null}
+    </section>
   );
 }
-
-export default ProductSection;

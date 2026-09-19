@@ -13,6 +13,15 @@ La idea es poder brindarle al cliente un interfaz un poco mas amigable, al poder
 
 Aplicación desplegada [TOCANDO ACÁ](https://ecommerce-nextjs-victorioo.vercel.app/).
 
+## Mercado Pago
+
+- Solucion: Checkout Pro (Preferences API)
+- Aplicacion: Aliada Studio Print (`8628001568491154`)
+- Webhook: `https://aliadaa.vercel.app/api/webhooks/mercado-pago`
+- Evento: `payment`
+
+La tienda recalcula precios en servidor y confirma pedidos solo mediante webhooks firmados. Para pasar a cobros reales, activar las credenciales productivas en Mercado Pago, reemplazar `MERCADOPAGO_ACCESS_TOKEN` en Vercel y establecer `MERCADOPAGO_USE_SANDBOX=false`.
+
 
 
 

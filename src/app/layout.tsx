@@ -1,10 +1,25 @@
+import {
+  ClerkProvider,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Alegreya_Sans, Cormorant_Garamond } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
 import "../app/globals.css";
-import { refreshData } from "../api";
-const inter = Inter({ subsets: ["latin"] });
+
+const bodyFont = Alegreya_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-body",
+});
+const displayFont = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-display",
+});
 
 export const metadata: Metadata = {
   title: "Aliada Stickers",
@@ -16,45 +31,62 @@ export default function RootLayout({
 }: {
   children: React.JSX.Element;
 }) {
-  refreshData();
-
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <header className="w-full bg-[#fff3e6] border-b border-[#f1b27a] shadow-sm">
-          <div className="mx-auto w-[95%] max-w-7xl flex items-center justify-between py-3">
-            <Link href="/" className="flex items-center gap-4">
+    <ClerkProvider>
+      <html lang="es">
+        <body className={`${bodyFont.variable} ${displayFont.variable} font-sans`}>
+        <header className="sticky top-0 z-40 w-full border-b border-ink/15 bg-paper/95 backdrop-blur-md">
+          <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+            <Link href="/" className="flex items-center gap-3" aria-label="Aliada Studio Print, inicio">
               <Image
                 src="/aliada.jpeg"
                 alt="Logo de Aliada"
-                width={96}
-                height={96}
-                className="h-20 w-20 sm:h-24 sm:w-24 object-cover rounded-full ring-4 ring-[#f7903d]"
+                width={52}
+                height={52}
+                className="h-12 w-12 border border-ink/15 object-cover"
               />
-              <span className="text-[#8a3d00] text-xl sm:text-2xl font-bold">
-                Aliada Stickers
+              <span className="font-display text-xl font-bold text-ink sm:text-2xl">
+                Aliada
               </span>
             </Link>
 
-            <nav className="flex items-center gap-2 sm:gap-4">
+            <nav className="flex items-center gap-3 text-sm font-bold sm:gap-6">
+              <Link href="/#catalogo" className="hidden text-ink transition-colors hover:text-clay sm:block">
+                Tienda
+              </Link>
               <Link
                 href="/contacto"
-                className="rounded-full bg-[#a74700] px-4 sm:px-6 py-2 font-semibold text-[#fff3e6] transition-colors hover:bg-[#8a3d00]"
+                className="text-ink transition-colors hover:text-clay"
               >
                 Contacto
               </Link>
-              <Link
-                href="/"
-                className="rounded-full border border-[#a74700] bg-[#ffd6b3] px-4 sm:px-6 py-2 font-semibold text-[#8a3d00] transition-colors hover:bg-[#ffc08a]"
-              >
-                Tienda
-              </Link>
+              <SignedOut>
+                <Link
+                  href="/sign-in"
+                  className="border border-ink bg-ink px-4 py-2 text-paper transition-colors hover:bg-clay"
+                >
+                  Ingresar
+                </Link>
+              </SignedOut>
+              <SignedIn>
+                <Link href="/admin" className="text-ink transition-colors hover:text-clay">
+                  Panel
+                </Link>
+                <UserButton />
+              </SignedIn>
             </nav>
           </div>
         </header>
 
         {children}
-      </body>
-    </html>
+        <footer className="border-t border-ink/15 bg-ink px-4 py-8 text-paper">
+          <div className="mx-auto flex max-w-7xl flex-col justify-between gap-4 sm:flex-row sm:items-center">
+            <p className="font-display text-xl font-semibold">Aliada Studio Print</p>
+            <p className="text-sm text-paper/65">Etiquetas, stickers y packaging hechos en Cordoba.</p>
+          </div>
+        </footer>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

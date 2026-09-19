@@ -1,98 +1,34 @@
-import Papa from "papaparse";
+import { asc, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-type RawProduct = {
-	title?: string;
-	category?: string;
-	image?: string;
-	price?: string | number;
-	quantity?: string | number;
-};
+import { db } from "@/db";
+import { products } from "@/db/schema";
+import { normalizeProductImage } from "@/lib/products";
 
-const DEFAULT_IMAGE = "/aliada.jpeg";
-
-const normalizeImageUrl = (raw: string | undefined) => {
-	const value = String(raw ?? "").trim();
-	if (!value) return DEFAULT_IMAGE;
-
-	const driveFileMatch = value.match(/\/d\/([a-zA-Z0-9_-]+)/);
-	if (value.includes("drive.google.com") && driveFileMatch?.[1]) {
-		return `/api/products/image?id=${driveFileMatch[1]}`;
-	}
-
-	const driveOpenMatch = value.match(/[?&]id=([^&]+)/);
-	if (value.includes("drive.google.com") && driveOpenMatch?.[1]) {
-		return `/api/products/image?id=${driveOpenMatch[1]}`;
-	}
-
-	if (value.startsWith("http://") || value.startsWith("https://")) {
-		return `/api/products/image?src=${encodeURIComponent(value)}`;
-	}
-
-	if (value.startsWith("www.")) {
-		return `/api/products/image?src=${encodeURIComponent(`https://${value}`)}`;
-	}
-
-	if (value.startsWith("/")) {
-		return value;
-	}
-
-	return value;
-};
-
-const toNumber = (value: string | number | undefined, fallback: number) => {
-	const normalized = String(value ?? "").replace(",", ".").trim();
-	const converted = Number(normalized);
-	return Number.isFinite(converted) ? converted : fallback;
-};
-
-const SHEET_CSV_URL =
-	"https://docs.google.com/spreadsheets/d/1Qxh_1sP-d_oX54ZX0APPNtLBYkUXYly7/export?format=csv&gid=88185419";
+export const dynamic = "force-dynamic";
 
 export async function GET() {
 	try {
-		const response = await fetch(SHEET_CSV_URL, {
-			cache: "no-store",
-			redirect: "follow",
-		});
+		const catalog = await db
+			.select()
+			.from(products)
+			.where(eq(products.active, true))
+			.orderBy(asc(products.title));
 
-		if (!response.ok) {
-			return NextResponse.json(
-				{ error: "Unable to fetch products from Google Sheets" },
-				{ status: 502 }
-			);
-		}
-
-		const csvText = await response.text();
-		const parsed = Papa.parse<RawProduct>(csvText, {
-			header: true,
-			skipEmptyLines: true,
-		});
-
-		if (parsed.errors.length > 0) {
-			return NextResponse.json(
-				{ error: "Unable to parse product data" },
-				{ status: 500 }
-			);
-		}
-
-		const products = parsed.data
-			.filter((product) => product.title && product.price)
-			.map((product) => ({
-				title: String(product.title ?? ""),
-				category: String(product.category ?? ""),
-				image: normalizeImageUrl(product.image),
-				price: toNumber(product.price, 0),
-				quantity: toNumber(product.quantity, 1),
-			}));
-
-		return NextResponse.json(products);
+		return NextResponse.json(
+			catalog.map((product) => ({
+				id: product.id,
+				title: product.title,
+				category: product.category,
+				image: normalizeProductImage(product.imageUrl),
+				price: product.priceInCents / 100,
+				quantity: 1,
+				stock: product.stock,
+			}))
+		);
 	} catch {
 		return NextResponse.json(
-			{
-				error:
-					"Could not load products. Ensure the Google Sheet is shared publicly or published as CSV.",
-			},
+			{ error: "No se pudo cargar el catalogo." },
 			{ status: 500 }
 		);
 	}

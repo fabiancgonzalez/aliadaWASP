@@ -3,19 +3,55 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
+  background-color: #f4efe6;
+  background-image:
+    linear-gradient(180deg, #fff3e2 0%, #ffd9ad 45%, #ff9e42 100%),
+    linear-gradient(rgba(41, 37, 31, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(41, 37, 31, 0.035) 1px, transparent 1px);
+  background-attachment: fixed, scroll, scroll;
+  background-size: 100% 100%, 32px 32px, 32px 32px;
+  color: #29251f;
+}
+
+::selection {
+  background: #d2a541;
+  color: #29251f;
+}
+
+.hero-content {
+  animation: reveal 700ms ease-out both;
+}
+
+.product-card {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 490px;
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .hero-content {
+    animation: none;
+  }
 }
