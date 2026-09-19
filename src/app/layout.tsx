@@ -39,11 +39,11 @@ export default function RootLayout({
           <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
             <Link href="/" className="flex items-center gap-3" aria-label="Aliada Studio Print, inicio">
               <Image
-                src="/aliada.jpeg"
+                src="/aliadacirculo.png"
                 alt="Logo de Aliada"
                 width={52}
                 height={52}
-                className="h-12 w-12 border border-ink/15 object-cover"
+                className="h-12 w-12 rounded-full"
               />
               <span className="font-display text-xl font-bold text-ink sm:text-2xl">
                 Aliada

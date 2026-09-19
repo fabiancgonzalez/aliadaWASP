@@ -5,25 +5,27 @@ import Link from "next/link";
 const App = () => {
   return (
     <main>
-      <section className="relative flex h-[34svh] min-h-[260px] max-h-[360px] items-end overflow-hidden rounded-b-2xl bg-clay shadow-md">
-        <Image
-          src="/aliada.jpeg"
-          alt="Identidad de Aliada Studio Print"
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-center"
-        />
-        <div className="absolute inset-0 bg-ink/35" />
-        <div className="hero-content relative mx-auto w-full max-w-7xl px-4 pb-6 text-paper sm:px-6 sm:pb-8 lg:px-8">
-          <p className="mb-1 text-xs font-bold uppercase">Cordoba, Argentina</p>
-          <h1 className="max-w-3xl font-display text-3xl font-semibold sm:text-5xl">
-            Aliada Studio Print
-          </h1>
-          <p className="mt-2 max-w-xl text-sm text-paper/90 sm:text-base">
-            Etiquetas, stickers y packaging para convertir cada detalle en algo propio.
-          </p>
-          <Link href="#catalogo" className="mt-4 inline-flex min-h-10 items-center bg-paper px-5 py-2 text-sm font-bold text-ink transition-colors hover:bg-gold">
+   
+
+        <section 
+  className="relative flex h-[34svh] min-h-[260px] max-h-[360px] items-center justify-center overflow-hidden rounded-b-2xl bg-clay shadow-md"  style={{ 
+    backgroundImage: "url('/aliadacirculo.png')",
+    backgroundRepeat: "repeat", 
+    backgroundSize: "265px" 
+  }}>
+  <div className="absolute inset-0 bg-white/40 " />
+   <div className="hero-content relative z-10 mx-auto w-full max-w-2xl px-4 py-8 text-center text-black sm:px-6 lg:px-8">
+    <p className="mb-2 text-xs font-extrabold uppercase tracking-widest text-black/60">
+    
+    </p>
+  
+   <h1 className="font-display text-3xl font-black sm:text-4xl text-black drop-shadow-sm leading-tight">
+      Aliada Studio Print
+    </h1>
+       <p className="mt-3 text-sm font-semibold text-black/80 sm:text-base max-w-none text-center whitespace-nowrap">
+      Etiquetas, stickers y packaging para convertir cada detalle en algo propio.
+    </p>
+          <Link href="#catalogo" className="rounded-full bg-black px-5 py-2 text-xs font-bold text-white shadow-md hover:bg-black/80 transition-all">
             Ver coleccion
           </Link>
         </div>
