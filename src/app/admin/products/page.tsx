@@ -18,6 +18,9 @@ export default function AdminProductsPage() {
   const [items, setItems] = useState<Product[]>([]);
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState(emptyForm);
+  const [editError, setEditError] = useState("");
 
   const load = () =>
     fetch("/api/admin/products")
@@ -67,6 +70,47 @@ export default function AdminProductsPage() {
     load();
   };
 
+  const startEdit = (product: Product) => {
+    setEditingId(product.id);
+    setEditError("");
+    setEditForm({
+      title: product.title,
+      category: product.category,
+      imageUrl: product.imageUrl,
+      price: (product.priceInCents / 100).toString(),
+      stock: product.stock.toString(),
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditError("");
+  };
+
+  const saveEdit = async (id: string) => {
+    setEditError("");
+    const priceInCents = Math.round(Number(editForm.price) * 100);
+    const stock = Number(editForm.stock);
+    const res = await fetch(`/api/admin/products/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: editForm.title,
+        category: editForm.category,
+        imageUrl: editForm.imageUrl,
+        priceInCents,
+        stock,
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.json();
+      setEditError(body.error ?? "Error al guardar los cambios.");
+      return;
+    }
+    setEditingId(null);
+    load();
+  };
+
   return (
     <main className="min-h-screen px-4 py-10 text-[#2f241f]">
       <section className="mx-auto max-w-5xl">
@@ -84,15 +128,33 @@ export default function AdminProductsPage() {
 
         <div className="mt-6 space-y-2">
           {items.map((p) => (
-            <div key={p.id} className="flex items-center justify-between gap-3 rounded-lg border border-[#dfc7ad] bg-white p-3">
-              <div>
-                <p className="font-bold">{p.title} <span className="font-normal text-sm text-[#6e625b]">({p.category})</span></p>
-                <p className="text-sm">${(p.priceInCents / 100).toFixed(2)} · stock {p.stock} · {p.active ? "activo" : "inactivo"}</p>
-              </div>
-              <div className="flex gap-2">
-                <button onClick={() => toggleActive(p)} className="rounded border px-3 py-1 text-sm">{p.active ? "Desactivar" : "Activar"}</button>
-                <button onClick={() => remove(p.id)} className="rounded border border-red-400 px-3 py-1 text-sm text-red-600">Eliminar</button>
-              </div>
+            <div key={p.id} className="rounded-lg border border-[#dfc7ad] bg-white p-3">
+              {editingId === p.id ? (
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <input placeholder="Titulo" className="rounded border p-2" value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} />
+                  <input placeholder="Categoria" className="rounded border p-2" value={editForm.category} onChange={(e) => setEditForm({ ...editForm, category: e.target.value })} />
+                  <input placeholder="URL de imagen" className="rounded border p-2 sm:col-span-2" value={editForm.imageUrl} onChange={(e) => setEditForm({ ...editForm, imageUrl: e.target.value })} />
+                  <input placeholder="Precio (ARS)" type="number" className="rounded border p-2" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: e.target.value })} />
+                  <input placeholder="Stock" type="number" className="rounded border p-2" value={editForm.stock} onChange={(e) => setEditForm({ ...editForm, stock: e.target.value })} />
+                  <div className="flex gap-2 sm:col-span-2">
+                    <button onClick={() => saveEdit(p.id)} className="rounded bg-[#a74700] px-4 py-1 text-sm font-bold text-white">Guardar</button>
+                    <button onClick={cancelEdit} className="rounded border px-4 py-1 text-sm">Cancelar</button>
+                  </div>
+                  {editError ? <p className="sm:col-span-2 text-sm text-red-600">{editError}</p> : null}
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-bold">{p.title} <span className="font-normal text-sm text-[#6e625b]">({p.category})</span></p>
+                    <p className="text-sm">${(p.priceInCents / 100).toFixed(2)} · stock {p.stock} · {p.active ? "activo" : "inactivo"}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => startEdit(p)} className="rounded border px-3 py-1 text-sm">Editar</button>
+                    <button onClick={() => toggleActive(p)} className="rounded border px-3 py-1 text-sm">{p.active ? "Desactivar" : "Activar"}</button>
+                    <button onClick={() => remove(p.id)} className="rounded border border-red-400 px-3 py-1 text-sm text-red-600">Eliminar</button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
