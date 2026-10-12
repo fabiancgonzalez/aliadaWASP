@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import sharp from "sharp";
 
 import { db } from "@/db";
 import { productImages } from "@/db/schema";
@@ -22,15 +21,24 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const buffer = await sharp(Buffer.from(await file.arrayBuffer()))
-      .rotate()
-      .resize(1000, 1000, { fit: "inside", withoutEnlargement: true })
-      .webp({ quality: 82 })
-      .toBuffer();
+    const original = Buffer.from(await file.arrayBuffer());
+    let buffer = original;
+    let contentType = file.type;
+    try {
+      const sharp = (await import("sharp")).default;
+      buffer = await sharp(original)
+        .rotate()
+        .resize(1000, 1000, { fit: "inside", withoutEnlargement: true })
+        .webp({ quality: 82 })
+        .toBuffer();
+      contentType = "image/webp";
+    } catch {
+      // Sin sharp se guarda la imagen original.
+    }
 
     const [created] = await db
       .insert(productImages)
-      .values({ contentType: "image/webp", data: buffer.toString("base64") })
+      .values({ contentType, data: buffer.toString("base64") })
       .returning({ id: productImages.id });
 
     return NextResponse.json({ url: `/api/uploads/${created.id}` }, { status: 201 });

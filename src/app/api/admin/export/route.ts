@@ -3,7 +3,6 @@ import ExcelJS from "exceljs";
 import { NextRequest, NextResponse } from "next/server";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import sharp from "sharp";
 
 import { db } from "@/db";
 import { productImages, products } from "@/db/schema";
@@ -88,11 +87,21 @@ export async function GET(request: NextRequest) {
     const raw = await loadImageBuffer(p.imageUrl);
     if (!raw) continue;
     try {
-      const png = await sharp(raw)
-        .resize(160, 160, { fit: "contain", background: "#ffffff" })
-        .png()
-        .toBuffer();
-      const imageId = workbook.addImage({ buffer: png as unknown as ExcelJS.Buffer, extension: "png" });
+      let img: Buffer = raw;
+      let extension: "png" | "jpeg" | "gif" = "png";
+      try {
+        const sharp = (await import("sharp")).default;
+        img = await sharp(raw)
+          .resize(160, 160, { fit: "contain", background: "#ffffff" })
+          .png()
+          .toBuffer();
+      } catch {
+        // Sin sharp: se usa la imagen original si es PNG/JPEG/GIF.
+        if (raw[0] === 0xff && raw[1] === 0xd8) extension = "jpeg";
+        else if (raw[0] === 0x47 && raw[1] === 0x49) extension = "gif";
+        else if (!(raw[0] === 0x89 && raw[1] === 0x50)) continue;
+      }
+      const imageId = workbook.addImage({ buffer: img as unknown as ExcelJS.Buffer, extension });
       sheet.addImage(imageId, {
         tl: { col: 0.1, row: i + 1.1 },
         ext: { width: 110, height: 110 },
