@@ -144,6 +144,9 @@ export default function AdminProductsPage() {
   const [filter, setFilter] = useState("");
   const [search, setSearch] = useState("");
   const [exportImages, setExportImages] = useState(true);
+  const importRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState<{ message: string; errors: string[] } | null>(null);
 
   const load = () =>
     fetch("/api/admin/products")
@@ -240,6 +243,32 @@ export default function AdminProductsPage() {
     load();
   };
 
+  const importExcel = async (file: File | undefined) => {
+    if (!file) return;
+    setImporting(true);
+    setImportResult(null);
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      const res = await fetch("/api/admin/import", { method: "POST", body });
+      const data = await res.json();
+      if (!res.ok) {
+        setImportResult({ message: data.error ?? "No se pudo importar.", errors: [] });
+      } else {
+        setImportResult({
+          message: `Importacion lista: ${data.created} nuevos, ${data.updated} actualizados${data.errorCount ? `, ${data.errorCount} con error` : ""}.`,
+          errors: data.errors,
+        });
+        load();
+      }
+    } catch {
+      setImportResult({ message: "No se pudo importar el archivo.", errors: [] });
+    } finally {
+      setImporting(false);
+      if (importRef.current) importRef.current.value = "";
+    }
+  };
+
   const exportParams = new URLSearchParams();
   if (filter) exportParams.set("category", filter);
   if (!exportImages) exportParams.set("images", "0");
@@ -271,6 +300,27 @@ export default function AdminProductsPage() {
           <a href={`/api/admin/export?${exportParams.toString()}`} className="rounded bg-[#2f241f] px-4 py-2 text-sm font-bold text-white">
             Exportar Excel{filter ? ` (${filter})` : ""}
           </a>
+        </div>
+
+        <div className="mt-3 rounded-lg border border-[#dfc7ad] bg-white p-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-bold">Carga masiva:</span>
+            <a href="/api/admin/import" className="rounded border border-[#2f241f] px-4 py-2 text-sm font-bold">
+              Descargar plantilla
+            </a>
+            <input ref={importRef} type="file" accept=".xlsx" className="hidden" onChange={(e) => importExcel(e.target.files?.[0])} />
+            <button type="button" disabled={importing} onClick={() => importRef.current?.click()} className="rounded bg-[#a74700] px-4 py-2 text-sm font-bold text-white disabled:opacity-50">
+              {importing ? "Importando..." : "Subir Excel de productos"}
+            </button>
+          </div>
+          {importResult ? (
+            <div className="mt-2 text-sm">
+              <p className="font-bold">{importResult.message}</p>
+              {importResult.errors.map((m, i) => (
+                <p key={i} className="text-red-600">{m}</p>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         <div className="mt-4 space-y-3">
