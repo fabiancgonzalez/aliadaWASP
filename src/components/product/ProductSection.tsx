@@ -42,7 +42,7 @@ export default function ProductSection({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [requestVersion, setRequestVersion] = useState(0);
-  const [activeCategory, setActiveCategory] = useState("Todos");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -100,6 +100,11 @@ export default function ProductSection({
       ).values()
     ),
   ];
+  const defaultCategory =
+    (!isBeauty &&
+      categories.find((c) => c.toLocaleLowerCase("es") === "libreria")) ||
+    "Todos";
+  const activeCategory = selectedCategory ?? defaultCategory;
   const visibleProducts =
     activeCategory === "Todos"
       ? sectionProducts
@@ -170,7 +175,7 @@ export default function ProductSection({
                 ? "border-ink bg-ink text-paper"
                 : "border-ink/25 text-ink hover:border-clay hover:text-clay"
             }`}
-            onClick={() => setActiveCategory(category)}
+            onClick={() => setSelectedCategory(category)}
           >
             {category}
           </button>
