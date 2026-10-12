@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const original = Buffer.from(await file.arrayBuffer());
-    let buffer = original;
+    let buffer: Buffer = original;
     let contentType = file.type;
     try {
       const sharp = (await import("sharp")).default;
