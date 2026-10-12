@@ -22,6 +22,27 @@
       "when": 1789778879191,
       "tag": "0002_nice_elektra",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791815899824,
+      "tag": "0003_new_tomas",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791817807172,
+      "tag": "0004_vengeful_oracle",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791820403689,
+      "tag": "0005_gifted_skrulls",
+      "breakpoints": true
     }
   ]
 }

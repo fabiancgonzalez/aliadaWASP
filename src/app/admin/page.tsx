@@ -4,6 +4,7 @@ import Link from "next/link";
 import { db } from "@/db";
 import { orders, products } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
+import AdminNav from "./components/nav/nav";
 
 export const dynamic = "force-dynamic";
 
@@ -25,15 +26,11 @@ export default async function AdminPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#f7f2e8] px-4 py-10 text-[#2f241f]">
+    <main className="min-h-screen bg-[#E86423] px-4 py-10 text-[#2f241f] placeholder-black">
       <section className="mx-auto max-w-6xl">
-        <p className="text-sm font-semibold uppercase text-[#a74700]">Administracion</p>
+        <p className="text-sm font-semibold uppercase text-black">Administracion</p>
         <h1 className="mt-2 text-3xl font-bold">Hola, {user.firstName ?? "Aliada"}</h1>
-        <nav className="mt-4 flex flex-wrap gap-3 text-sm font-bold">
-          <Link href="/admin/products" className="rounded border border-[#dfc7ad] bg-white px-4 py-2 hover:bg-[#f0e2cf]">Productos</Link>
-          <Link href="/admin/orders" className="rounded border border-[#dfc7ad] bg-white px-4 py-2 hover:bg-[#f0e2cf]">Pedidos</Link>
-          <a href="https://dashboard.clerk.com" target="_blank" rel="noreferrer" className="rounded border border-[#dfc7ad] bg-white px-4 py-2 hover:bg-[#f0e2cf]">Usuarios (Clerk)</a>
-        </nav>
+      <AdminNav />
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
           {metrics.map((metric) => (
             <article key={metric.label} className="rounded-lg border border-[#dfc7ad] bg-white p-5 shadow-sm">

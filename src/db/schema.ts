@@ -28,6 +28,8 @@ export const products = pgTable(
     title: varchar("title", { length: 160 }).notNull(),
     category: varchar("category", { length: 100 }).notNull(),
     imageUrl: text("image_url").notNull(),
+    description: text("description").default("").notNull(),
+    barcode: varchar("barcode", { length: 64 }),
     priceInCents: integer("price_in_cents").notNull(),
     stock: integer("stock").default(0).notNull(),
     active: boolean("active").default(true).notNull(),
@@ -36,8 +38,25 @@ export const products = pgTable(
   },
   (table) => ({
     titleUnique: uniqueIndex("products_title_unique").on(table.title),
-  })
+        barcodeUnique: uniqueIndex("products_barcode_unique").on(table.barcode),
+      })
 );
+
+export const customers = pgTable("customers", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: varchar("name", { length: 160 }).notNull(),
+  phone: varchar("phone", { length: 40 }).default("").notNull(),
+  email: varchar("email", { length: 200 }).default("").notNull(),
+  address: text("address").default("").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const productImages = pgTable("product_images", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  contentType: varchar("content_type", { length: 50 }).notNull(),
+  data: text("data").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
 
 export const orders = pgTable("orders", {
   id: uuid("id").defaultRandom().primaryKey(),

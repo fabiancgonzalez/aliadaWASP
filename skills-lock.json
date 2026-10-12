@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "building-components": {
+      "source": "vercel/components.build",
+      "sourceType": "github",
+      "skillPath": "skills/building-components/SKILL.md",
+      "computedHash": "20889af7cb9b3abca1e38824f7fffaa873eb0cc4d45187967b97bd85462cf934"
+    },
     "chat-sdk": {
       "source": "vercel-labs/open-agents",
       "sourceType": "github",
@@ -25,11 +31,23 @@
       "skillPath": ".agents/skills/plan-mode/SKILL.md",
       "computedHash": "fccffcb9ca28c7b716eb237036b13f394d422b7fbf5d508515f199154713a1fd"
     },
+    "ucp": {
+      "source": "vercel-labs/agentic-commerce-skills",
+      "sourceType": "github",
+      "skillPath": "ucp/SKILL.md",
+      "computedHash": "05987423e41eca47ea1f125b2fd9470539fd3f726a7eb50c282d38bf2846ff1c"
+    },
     "vercel-react-best-practices": {
       "source": "vercel-labs/open-agents",
       "sourceType": "github",
       "skillPath": ".agents/skills/vercel-react-best-practices/SKILL.md",
       "computedHash": "f78d3f1ca3b637fde290357ce4e38c5c6559ddfb6f114325e23f7a00e16f9777"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-design-guidelines/SKILL.md",
+      "computedHash": "d8e7d3afe37dcc8a97b99ffb5afdb4d0919ae0092ea8b68f44eb201f035e33ac"
     }
   }
 }

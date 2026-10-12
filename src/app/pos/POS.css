@@ -1,0 +1,274 @@
+.pos-container *, .pos-container *::before, .pos-container *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+.pos-container {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background: #f4f6f9;
+  color: #333;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* NAVBAR */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1e3a8a;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+.logo { font-size: 1.4rem; font-weight: bold; }
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  margin: 0 10px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+.nav-links a:hover, .nav-links a.active { background: rgba(255,255,255,0.2); }
+.logout { background: #dc2626 !important; }
+
+/* HEADER */
+.pos-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.pos-header h1 { color: #1e3a8a; font-size: 2rem; }
+.pos-header p { color: #666; margin-top: 6px; }
+
+/* BÚSQUEDA */
+.busqueda-section {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+}
+.busqueda-wrapper {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.busqueda-wrapper input {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+.busqueda-wrapper button {
+  padding: 12px 20px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.busqueda-wrapper button:hover { background: #059669; }
+
+/* FACTURACIÓN */
+.facturacion-section {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+}
+.facturacion-section h3 { margin-bottom: 16px; color: #1e3a8a; }
+.facturacion-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+.campo label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+.campo input, .campo select {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+.cliente-input { display: flex; gap: 8px; }
+.cliente-input input { flex: 1; }
+.cliente-input button {
+  padding: 10px 14px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-group { display: flex; gap: 6px; }
+.btn-group button {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid #ddd;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.btn-group button.activo {
+  background: #1e3a8a;
+  color: white;
+  border-color: #1e3a8a;
+}
+
+/* CARRITO */
+.carrito-section {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+}
+.carrito-section h3 { color: #1e3a8a; margin-bottom: 12px; }
+.total-banner {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+.total-banner span { font-size: 1.8rem; }
+
+.tabla-carrito {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+.tabla-carrito th {
+  background: #f1f5f9;
+  padding: 12px;
+  text-align: left;
+  font-size: 0.9rem;
+  color: #475569;
+}
+.tabla-carrito td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+.tabla-carrito input[type="number"] {
+  width: 80px;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+.vacio { text-align: center; color: #999; padding: 30px !important; }
+.btn-eliminar {
+  background: #fee2e2;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.carrito-acciones {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+.btn-vaciar, .btn-cobrar {
+  padding: 14px 28px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.btn-vaciar { background: #ef4444; color: white; }
+.btn-cobrar { background: #10b981; color: white; }
+.btn-vaciar:hover, .btn-cobrar:hover { transform: translateY(-2px); }
+
+/* MODALES */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal {
+  background: white;
+  padding: 28px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+.modal h3 { margin-bottom: 16px; color: #1e3a8a; }
+.modal input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+}
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+.modal-actions button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.modal-actions button:first-child { background: #10b981; color: white; }
+.modal-actions button:last-child { background: #e5e7eb; }
+
+.scanner-placeholder {
+  background: #000;
+  color: #0f0;
+  padding: 60px 20px;
+  text-align: center;
+  border-radius: 8px;
+  margin: 16px 0;
+  font-family: monospace;
+}
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-size: 0.9rem;
+}
+.footer a { color: #1e3a8a; text-decoration: none; }
+/* Ticket */
+.ticket { width: 80mm; max-width: 100%; margin: 0 auto; font-family: monospace; font-size: 12px; color: #000; background: #fff; padding: 8px; }
+.ticket-center { text-align: center; }
+.ticket-title { font-size: 18px; }
+.ticket-row { display: flex; justify-content: space-between; gap: 8px; }
+.ticket-item { margin-bottom: 6px; }
+.ticket-total { font-weight: bold; font-size: 14px; }
+.ticket hr { border: 0; border-top: 1px dashed #000; margin: 6px 0; }
+.ticket-actions { display: flex; gap: 8px; margin-top: 12px; }
+.ticket-actions button { flex: 1; }
+@media print {
+  body * { visibility: hidden !important; }
+  #ticket-print, #ticket-print * { visibility: visible !important; }
+  #ticket-print { position: fixed; left: 0; top: 0; width: 80mm; }
+  @page { margin: 4mm; }
+}

@@ -25,7 +25,16 @@ const formatPrice = (price: number) =>
     maximumFractionDigits: 0,
   }).format(price);
 
-export default function ProductSection() {
+const BEAUTY_CATEGORY = /belleza|cosm[eé]tica/i;
+const isBeautyProduct = (product: ProductTypes) =>
+  BEAUTY_CATEGORY.test(product.category);
+
+export default function ProductSection({
+  section = "print",
+}: {
+  section?: "print" | "beauty";
+}) {
+  const isBeauty = section === "beauty";
   const [cart, setCart] = useState<ProductTypes[]>([]);
   const [products, setProducts] = useState<ProductTypes[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
@@ -77,11 +86,14 @@ export default function ProductSection() {
     };
   }, [requestVersion]);
 
+  const sectionProducts = products.filter(
+    (product) => isBeautyProduct(product) === isBeauty
+  );
   const categories = [
     "Todos",
     ...Array.from(
       new Map(
-        products.map((product) => [
+        sectionProducts.map((product) => [
           product.category.toLocaleLowerCase("es"),
           product.category,
         ])
@@ -90,8 +102,8 @@ export default function ProductSection() {
   ];
   const visibleProducts =
     activeCategory === "Todos"
-      ? products
-      : products.filter(
+      ? sectionProducts
+      : sectionProducts.filter(
           (product) =>
             product.category.toLocaleLowerCase("es") ===
             activeCategory.toLocaleLowerCase("es")
@@ -131,13 +143,19 @@ export default function ProductSection() {
     <section id="catalogo" className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="flex flex-col justify-between gap-6 border-b border-ink/20 pb-8 md:flex-row md:items-end">
         <div>
-          <p className="text-sm font-bold uppercase text-clay">Coleccion actual</p>
+          <p className="text-sm font-bold uppercase text-clay">
+            {isBeauty ? "Belleza y Cosmetica" : "Coleccion actual"}
+          </p>
           <h2 className="font-display text-4xl font-semibold text-ink sm:text-5xl">
-            Stickers para hacer tuyo lo cotidiano.
+            {isBeauty
+              ? "Tu momento de cuidado y color."
+              : "Stickers para hacer tuyo lo cotidiano."}
           </h2>
         </div>
         <p className="max-w-md text-lg text-ink/70">
-          Diseños impresos con cuidado para cuadernos, regalos, marcas y todo lo que quieras personalizar.
+          {isBeauty
+            ? "Perfumeria, maquillaje y cuidado personal de Avon y Natura."
+            : "Diseños impresos con cuidado para cuadernos, regalos, marcas y todo lo que quieras personalizar."}
         </p>
       </div>
 

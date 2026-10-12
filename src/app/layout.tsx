@@ -51,9 +51,23 @@ export default function RootLayout({
             </Link>
 
             <nav className="flex items-center gap-3 text-sm font-bold sm:gap-6">
-              <Link href="/#catalogo" className="hidden text-ink transition-colors hover:text-clay sm:block">
-                Tienda
-              </Link>
+              <div className="group relative">
+                <button
+                  type="button"
+                  aria-haspopup="true"
+                  className="text-ink transition-colors hover:text-clay"
+                >
+                  Tienda ▾
+                </button>
+                <div className="invisible absolute left-0 top-full z-50 min-w-48 border border-ink/15 bg-paper opacity-0 shadow-lg transition group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+                  <Link href="/#catalogo" className="block px-4 py-3 text-ink hover:bg-ink/5 hover:text-clay">
+                    Aliada Print Studio
+                  </Link>
+                  <Link href="/beauty" className="block px-4 py-3 text-ink hover:bg-ink/5 hover:text-clay">
+                    Aliada Beauty
+                  </Link>
+                </div>
+              </div>
               <Link
                 href="/contacto"
                 className="text-ink transition-colors hover:text-clay"

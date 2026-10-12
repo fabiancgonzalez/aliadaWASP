@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
+import AdminNav from "../components/nav/nav";
 type Order = {
   id: string;
   customerEmail: string;
@@ -52,6 +52,7 @@ export default function AdminOrdersPage() {
     <main className="min-h-screen px-4 py-10 text-[#2f241f]">
       <section className="mx-auto max-w-5xl">
         <h1 className="text-2xl font-bold">Pedidos</h1>
+        <AdminNav />
         <div className="mt-6 space-y-2">
           {items.map((o) => (
             <div key={o.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#dfc7ad] bg-white p-3">
