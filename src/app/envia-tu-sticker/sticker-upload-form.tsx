@@ -95,7 +95,7 @@ export default function StickerUploadForm() {
         <textarea name="message" rows={3} maxLength={1000} className={inputClass} />
       </label>
 
-      <div className="sticker-pond rounded-3xl bg-[#edf0f4] p-4">
+      <div className="sticker-pond rounded-3xl bg-[#D47E30]   p-4 font-bold  text-black style={{ color: 'black' }} ">
         <FilePond
           ref={pondRef}
           server={server}
@@ -110,7 +110,7 @@ export default function StickerUploadForm() {
           credits={false}
           instantUpload={false}
           imagePreviewHeight={220}
-          labelIdle='Arrastrá tu dibujo o <span class="filepond--label-action">Buscalo</span>'
+          labelIdle='Arrastrá tu dibujo o <span class="filepond--label-action">Buscalo en tu dispositivo</span>'
         />
       </div>
       <p className="text-sm text-ink/70">
