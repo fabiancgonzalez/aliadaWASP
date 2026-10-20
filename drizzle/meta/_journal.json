@@ -43,6 +43,13 @@
       "when": 1791820403689,
       "tag": "0005_gifted_skrulls",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792510229323,
+      "tag": "0006_plain_mathemanic",
+      "breakpoints": true
     }
   ]
 }

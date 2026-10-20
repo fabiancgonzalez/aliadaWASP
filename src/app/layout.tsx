@@ -54,6 +54,12 @@ export default function RootLayout({
             <nav className="flex items-center gap-3 text-sm font-bold sm:gap-6">
               <StoreMenu />
               <Link
+                href="/envia-tu-sticker"
+                className="text-ink transition-colors hover:text-clay"
+              >
+                Envía tu Sticker
+              </Link>
+              <Link
                 href="/contacto"
                 className="text-ink transition-colors hover:text-clay"
               >

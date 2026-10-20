@@ -55,3 +55,7 @@ body {
     animation: none;
   }
 }
+
+.sticker-pond .filepond--panel-root { background-color: transparent; }
+.sticker-pond .filepond--drop-label { color: #4a5568; }
+.sticker-pond .filepond--file-action-button { background-color: rgba(0,0,0,.55); }

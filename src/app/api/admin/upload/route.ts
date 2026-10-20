@@ -6,7 +6,7 @@ import { requireAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-const MAX_BYTES = 8 * 1024 * 1024;
+const MAX_BYTES = 16 * 1024 * 1024;
 
 export async function POST(request: NextRequest) {
   await requireAdmin();
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Selecciona un archivo de imagen." }, { status: 400 });
   }
   if (file.size > MAX_BYTES) {
-    return NextResponse.json({ error: "La imagen supera los 8 MB." }, { status: 400 });
+    return NextResponse.json({ error: "La imagen supera los 16 MB." }, { status: 400 });
   }
 
   try {
