@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aliada Studio Print · Asistente Multiagente</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .card { background: #1e293b; width: 100%; max-width: 520px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); overflow: hidden; display: flex; flex-direction: column; height: 85vh; }
+    .header { background: linear-gradient(135deg, #ec4899, #8b5cf6); padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { margin: 0; font-size: 1.1rem; }
+    .toggle-voice { background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 12px; border-radius: 99px; cursor: pointer; font-size: 0.8rem; }
+    .chat-box { flex: 1; padding: 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+    .msg { max-width: 82%; padding: 12px 15px; border-radius: 16px; line-height: 1.45; font-size: 0.95rem; white-space: pre-wrap; }
+    .user { background: #3b82f6; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .bot { background: #334155; align-self: flex-start; border-bottom-left-radius: 4px; }
+    .badge { display: inline-block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; background: #0f172a; color: #38bdf8; padding: 2px 8px; border-radius: 6px; margin-bottom: 6px; font-weight: 700; }
+    .approval-box { background: #451a03; border: 1px solid #f59e0b; padding: 12px; border-radius: 12px; margin-top: 8px; }
+    .approval-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .btn-yes { background: #10b981; color: white; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .btn-no { background: #ef4444; color: white; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .controls { padding: 14px; background: #0f172a; display: flex; gap: 8px; align-items: center; }
+    input { flex: 1; background: #1e293b; border: 1px solid #334155; color: white; padding: 12px 14px; border-radius: 12px; outline: none; font-size: 0.95rem; }
+    .btn-mic { background: #ec4899; border: none; color: white; width: 46px; height: 46px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+    .btn-mic.listening { background: #ef4444; animation: pulse 1.2s infinite; }
+    .btn-attach { background: #334155; border: none; color: white; width: 46px; height: 46px; border-radius: 50%; cursor: pointer; font-size: 1.15rem; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+    .btn-attach:hover { background: #475569; }
+    .btn-send { background: #6366f1; border: none; color: white; padding: 0 16px; height: 46px; border-radius: 12px; cursor: pointer; font-weight: 600; }
+    .upload-panel { display: none; padding: 12px 14px; background: #16213a; border-top: 1px solid #334155; flex-direction: column; gap: 8px; }
+    .upload-panel.open { display: flex; }
+    .upload-panel input { font-size: 0.85rem; padding: 9px 12px; }
+    .upload-file-chip { font-size: 0.82rem; color: #38bdf8; font-weight: 600; }
+    .upload-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .btn-upload { background: #10b981; color: white; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .btn-cancel { background: #475569; color: white; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h1>🎨 Aliada Studio Print · Agentes IA</h1>
+      <button id="ttsToggle" class="toggle-voice">🔊 Voz: ON</button>
+    </div>
+    <div id="chatBox" class="chat-box">
+      <div class="msg bot">
+        <div class="badge">Orquestador</div><br>
+        ¡Hola! Habla o escribe para consultar stickers, armar un pedido, generar link de Mercado Pago o revisar métricas de negocio.
+      </div>
+    </div>
+    <div id="uploadPanel" class="upload-panel">
+      <span id="fileChip" class="upload-file-chip"></span>
+      <input id="upName" type="text" placeholder="Tu nombre *" />
+      <input id="upEmail" type="email" placeholder="Tu email *" />
+      <input id="upMsg" type="text" placeholder="Mensaje o indicaciones (opcional)" />
+      <div class="upload-actions">
+        <button id="cancelUpload" class="btn-cancel">Cancelar</button>
+        <button id="sendUpload" class="btn-upload">Enviar sticker</button>
+      </div>
+    </div>
+    <div class="controls">
+      <input id="fileInput" type="file" accept="image/*,.pdf,.svg,.webp" style="display:none" />
+      <button id="attachBtn" class="btn-attach" title="Enviar tu sticker (foto o archivo)">📎</button>
+      <button id="micBtn" class="btn-mic" title="Hablar por micrófono">🎤</button>
+      <input id="textInput" type="text" placeholder="Escribe o toca el micrófono..." />
+      <button id="sendBtn" class="btn-send">Enviar</button>
+    </div>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById("chatBox");
+    const textInput = document.getElementById("textInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const micBtn = document.getElementById("micBtn");
+    const ttsToggle = document.getElementById("ttsToggle");
+
+    let threadId = null;
+    let voiceEnabled = true;
+
+    ttsToggle.onclick = () => {
+      voiceEnabled = !voiceEnabled;
+      ttsToggle.textContent = voiceEnabled ? "🔊 Voz: ON" : "🔇 Voz: OFF";
+      if (!voiceEnabled) window.speechSynthesis.cancel();
+    };
+
+    function hablar(texto) {
+      if (!voiceEnabled || !("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const limpio = texto.replace(/[*#_`-]/g, "");
+      const utterance = new SpeechSynthesisUtterance(limpio);
+      utterance.lang = "es-AR";
+      utterance.rate = 1.05;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function agregarMensaje(texto, tipo, agente = "", approvalData = null) {
+      const div = document.createElement("div");
+      div.className = `msg ${tipo}`;
+      if (tipo === "bot") {
+        let html = `<div class="badge">${agente || "Agente"}</div><br>${texto}`;
+        if (approvalData) {
+          html += `
+            <div class="approval-box">
+              <strong>⚠️ Aprobación Super_Admin requerida:</strong><br>
+              Producto: ${approvalData.producto}<br>
+              Precio: ${approvalData.precio_actual} ➔ ${approvalData.nuevo_precio}<br>
+              Stock: ${approvalData.stock_actual} ➔ ${approvalData.nuevo_stock}
+              <div class="approval-actions">
+                <button class="btn-yes" onclick="enviarAprobacion('si', this)">✅ Aprobar cambio</button>
+                <button class="btn-no" onclick="enviarAprobacion('no', this)">❌ Rechazar</button>
+              </div>
+            </div>`;
+        }
+        div.innerHTML = html;
+      } else {
+        div.textContent = texto;
+      }
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function enviarMensaje(texto) {
+      if (!texto.trim()) return;
+      agregarMensaje(texto, "user");
+      textInput.value = "";
+
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: texto, thread_id: threadId }),
+        });
+        const data = await res.json();
+        threadId = data.thread_id;
+        agregarMensaje(data.reply, "bot", data.agent, data.approval_data);
+        hablar(data.reply);
+      } catch (err) {
+        agregarMensaje("Error de conexión con el servidor FastAPI.", "bot", "Sistema");
+      }
+    }
+
+    async function enviarAprobacion(decision, btn) {
+      btn.parentElement.innerHTML = `<em>Enviando decisión (${decision.toUpperCase()})...</em>`;
+      const res = await fetch("/chat/approve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ thread_id: threadId, decision }),
+      });
+      const data = await res.json();
+      agregarMensaje(data.reply, "bot", data.agent);
+      hablar(data.reply);
+    }
+
+    sendBtn.onclick = () => enviarMensaje(textInput.value);
+    textInput.onkeydown = (e) => { if (e.key === "Enter") enviarMensaje(textInput.value); };
+
+    // --- Subida de stickers (foto o archivo) ---
+    const attachBtn = document.getElementById("attachBtn");
+    const fileInput = document.getElementById("fileInput");
+    const uploadPanel = document.getElementById("uploadPanel");
+    const fileChip = document.getElementById("fileChip");
+    const upName = document.getElementById("upName");
+    const upEmail = document.getElementById("upEmail");
+    const upMsg = document.getElementById("upMsg");
+    const cancelUpload = document.getElementById("cancelUpload");
+    const sendUpload = document.getElementById("sendUpload");
+
+    attachBtn.onclick = () => fileInput.click();
+
+    fileInput.onchange = () => {
+      if (fileInput.files.length) {
+        const f = fileInput.files[0];
+        fileChip.textContent = `📎 ${f.name} (${(f.size / 1024).toFixed(0)} KB)`;
+        uploadPanel.classList.add("open");
+      }
+    };
+
+    function cerrarPanelSubida() {
+      uploadPanel.classList.remove("open");
+      fileInput.value = "";
+      upMsg.value = "";
+    }
+
+    cancelUpload.onclick = cerrarPanelSubida;
+
+    sendUpload.onclick = async () => {
+      const file = fileInput.files[0];
+      const nombre = upName.value.trim();
+      const email = upEmail.value.trim();
+      if (!file) return cerrarPanelSubida();
+      if (!nombre || !email) {
+        alert("Completá tu nombre y email para enviar el sticker.");
+        return;
+      }
+
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("name", nombre);
+      fd.append("email", email);
+      fd.append("message", upMsg.value.trim());
+
+      sendUpload.disabled = true;
+      sendUpload.textContent = "Subiendo...";
+      try {
+        const res = await fetch("/upload-sticker", { method: "POST", body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Error al subir el archivo.");
+        cerrarPanelSubida();
+        enviarMensaje(
+          `Acabo de subir mi sticker personalizado "${data.file_name}" (envío #${data.submission_id}) ` +
+          `a nombre de ${nombre} (${email}). ¿Podés revisar si el archivo es apto para impresión?`
+        );
+      } catch (err) {
+        agregarMensaje(`Error al subir el sticker: ${err.message}`, "bot", "Sistema");
+      } finally {
+        sendUpload.disabled = false;
+        sendUpload.textContent = "Enviar sticker";
+      }
+    };
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.lang = "es-AR";
+      recognition.interimResults = false;
+
+      micBtn.onclick = () => {
+        window.speechSynthesis.cancel();
+        recognition.start();
+        micBtn.classList.add("listening");
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        enviarMensaje(transcript);
+      };
+
+      recognition.onend = () => micBtn.classList.remove("listening");
+      recognition.onerror = () => micBtn.classList.remove("listening");
+    } else {
+      micBtn.style.display = "none";
+    }
+  </script>
+</body>
+</html>

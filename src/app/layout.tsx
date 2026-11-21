@@ -9,6 +9,7 @@ import { Alegreya_Sans, Cormorant_Garamond } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
 import StoreMenu from "@/components/StoreMenu";
+import AgenticaWidget from "@/components/AgenticaWidget";
 import "../app/globals.css";
 
 const bodyFont = Alegreya_Sans({
@@ -84,6 +85,7 @@ export default function RootLayout({
         </header>
 
         {children}
+        <AgenticaWidget />
         <footer className="border-t border-ink/15 bg-ink px-4 py-8 text-paper">
           <div className="mx-auto flex max-w-7xl flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <p className="font-display text-xl font-semibold">Aliada Studio Print</p>
