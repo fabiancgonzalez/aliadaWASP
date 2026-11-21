@@ -109,18 +109,18 @@ super_admin_agent = create_react_agent(
 # --- 3. ORQUESTADOR SUPERVISOR ---
 class RouteDecision(BaseModel):
     next_agent: Literal[
-        "sales_rep", "seller", "prepress", "cashier",
-        "community", "finance", "super_admin", "FINISH"
+        "representante", "vendedor", "preventa", "cajero",
+        "CM", "finanzas", "super_admin", "FINISH"
     ]
 
 supervisor_prompt = (
     "Eres el Orquestador Central de Aliada Studio Print. Analiza el mensaje y enruta al especialista correcto:\n"
-    "- 'sales_rep': Consultas de catálogo, precios generales, dudas de la tienda o registro de contacto.\n"
-    "- 'seller': Confirmar compra, verificar stock para comprar o generar una orden.\n"
-    "- 'prepress': Revisar archivos subidos en 'Envía tu Sticker', formatos PNG/PDF o cálculo de planchas.\n"
-    "- 'cashier': Datos de transferencia (alias/CVU), link de pago de Mercado Pago o verificar si una orden ya está pagada.\n"
-    "- 'community': Ideas de posts, campañas para redes sociales, rankings de productos más vendidos o promos por sobrestock.\n"
-    "- 'finance': Reportes de facturación, comisiones de Mercado Pago, cálculo de márgenes o ganancia neta.\n"
+    "- 'representante': Consultas de catálogo, precios generales, dudas de la tienda o registro de contacto.\n"
+    "- 'vendedor': Confirmar compra, verificar stock para comprar o generar una orden.\n"
+    "- 'preventa': Revisar archivos subidos en 'Envía tu Sticker', formatos PNG/PDF o cálculo de planchas.\n"
+    "- 'cajero': Datos de transferencia (alias/CVU), link de pago de Mercado Pago o verificar si una orden ya está pagada.\n"
+    "- 'CM': Ideas de posts, campañas para redes sociales, rankings de productos más vendidos o promos por sobrestock.\n"
+    "- 'finanzas': Reportes de facturación, comisiones de Mercado Pago, cálculo de márgenes o ganancia neta.\n"
     "- 'super_admin': Auditoría de base de datos, cambiar precios de productos o modificar stock en el sistema.\n"
     "- 'FINISH': Si la consulta ya está resuelta."
 )
@@ -137,12 +137,12 @@ builder = StateGraph(OrchestratorState)
 builder.add_node("supervisor", supervisor_node)
 
 agentes = {
-    "sales_rep": sales_rep_agent,
-    "seller": seller_agent,
-    "prepress": prepress_agent,
-    "cashier": cashier_agent,
-    "community": community_agent,
-    "finance": finance_agent,
+    "representante": sales_rep_agent,
+    "vendedor": seller_agent,
+    "preventa": prepress_agent,
+    "cajero": cashier_agent,
+    "CM": community_agent,
+    "finanzas": finance_agent,
     "super_admin": super_admin_agent,
 }
 

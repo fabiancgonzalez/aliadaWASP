@@ -1,6 +1,7 @@
 import os
 import uuid
 from datetime import datetime
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from sqlalchemy import Boolean, DateTime, Integer, String, Text, ForeignKey, select
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
@@ -9,13 +10,27 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+def _adaptar_url_asyncpg(url: str) -> str:
+    """Adapta una URL estándar de Neon/PostgreSQL para asyncpg.
+
+    asyncpg no acepta los parámetros 'sslmode' ni 'channel_binding' en la query
+    string: 'sslmode' se traduce a 'ssl' y 'channel_binding' se descarta, venga
+    en la posición que venga dentro de la URL.
+    """
+    url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    parts = urlsplit(url)
+    params = []
+    for key, value in parse_qsl(parts.query, keep_blank_values=True):
+        if key == "channel_binding":
+            continue
+        if key == "sslmode":
+            params.append(("ssl", value))
+            continue
+        params.append((key, value))
+    return urlunsplit(parts._replace(query=urlencode(params)))
+
 RAW_DB_URL = os.getenv("DATABASE_URL", "")
-# Adaptación automática de URL estándar de Neon para asyncpg
-ASYNC_DB_URL = (
-    RAW_DB_URL.replace("postgresql://", "postgresql+asyncpg://")
-    .replace("sslmode=require", "ssl=require")
-    .replace("&channel_binding=require", "")
-)
+ASYNC_DB_URL = _adaptar_url_asyncpg(RAW_DB_URL)
 
 engine = create_async_engine(ASYNC_DB_URL, echo=False, pool_pre_ping=True)
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
