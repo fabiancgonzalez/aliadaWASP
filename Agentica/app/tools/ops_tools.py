@@ -65,8 +65,13 @@ TRANSFER_TITULAR = os.getenv("TRANSFER_TITULAR", "Fabián González")
 @tool
 async def generar_datos_transferencia(order_id: str) -> str:
     """Devuelve alias, CVU y monto exacto para que el cliente pague una orden 'pending_payment' por transferencia."""
+    try:
+        orden_uuid = uuid.UUID(order_id)
+    except ValueError:
+        return f"Error: '{order_id}' no es un ID de orden válido (debe ser el UUID completo de la orden)."
+
     async with AsyncSessionLocal() as session:
-        stmt_order = select(Order).where(Order.id == uuid.UUID(order_id))
+        stmt_order = select(Order).where(Order.id == orden_uuid)
         order = (await session.execute(stmt_order)).scalar_one_or_none()
 
         if not order:
@@ -91,8 +96,13 @@ async def generar_link_pago_mercadopago(order_id: str) -> str:
     if not mp_token:
         return "Error de configuración: Falta MERCADOPAGO_ACCESS_TOKEN en el entorno."
 
+    try:
+        orden_uuid = uuid.UUID(order_id)
+    except ValueError:
+        return f"Error: '{order_id}' no es un ID de orden válido (debe ser el UUID completo de la orden)."
+
     async with AsyncSessionLocal() as session:
-        stmt_order = select(Order).where(Order.id == uuid.UUID(order_id))
+        stmt_order = select(Order).where(Order.id == orden_uuid)
         order = (await session.execute(stmt_order)).scalar_one_or_none()
         
         if not order:
@@ -148,8 +158,13 @@ async def generar_link_pago_mercadopago(order_id: str) -> str:
 @tool
 async def verificar_estado_pago_orden(order_id: str) -> str:
     """Consulta en PostgreSQL si el webhook firmado de Mercado Pago ya confirmó el pago de la orden."""
+    try:
+        orden_uuid = uuid.UUID(order_id)
+    except ValueError:
+        return f"Error: '{order_id}' no es un ID de orden válido (debe ser el UUID completo de la orden)."
+
     async with AsyncSessionLocal() as session:
-        stmt = select(Order).where(Order.id == uuid.UUID(order_id))
+        stmt = select(Order).where(Order.id == orden_uuid)
         order = (await session.execute(stmt)).scalar_one_or_none()
         
         if not order:

@@ -2,7 +2,7 @@ import os
 import uuid
 from datetime import datetime
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
-from sqlalchemy import Boolean, DateTime, Integer, String, Text, ForeignKey, select
+from sqlalchemy import Boolean, DateTime, Enum as PgEnum, Integer, String, Text, ForeignKey, select
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -58,13 +58,25 @@ class Customer(Base):
     address: Mapped[str] = mapped_column(Text, default="", nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
 
+# El tipo enum 'order_status' ya existe en la BD (lo crea Drizzle desde el frontend)
+order_status_type = PgEnum(
+    "pending_payment", "paid", "preparing", "ready", "completed",
+    "cancelled", "refunded", "charged_back",
+    name="order_status",
+    create_type=False,
+)
+
 class Order(Base):
     __tablename__ = "orders"
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     clerk_user_id: Mapped[str] = mapped_column(Text, nullable=False)
     customer_email: Mapped[str] = mapped_column(Text, nullable=False)
-    status: Mapped[str] = mapped_column(String(50), default="pending_payment", nullable=False)
+    status: Mapped[str] = mapped_column(order_status_type, default="pending_payment", nullable=False)
     total_in_cents: Mapped[int] = mapped_column(Integer, nullable=False)
+    mercado_pago_preference_id: Mapped[str | None] = mapped_column(Text, unique=True)
+    mercado_pago_payment_id: Mapped[str | None] = mapped_column(Text, unique=True)
+    payment_status_detail: Mapped[str | None] = mapped_column(Text)
+    paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
 
@@ -91,9 +103,3 @@ class StickerSubmission(Base):
     content_type: Mapped[str] = mapped_column(String(100), nullable=False)
     data: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
-
-# Asegúrate de que tu clase Order en database.py tenga también estas 4 columnas de tu schema.ts:
-# mercado_pago_preference_id: Mapped[str | None] = mapped_column(Text, unique=True)
-# mercado_pago_payment_id: Mapped[str | None] = mapped_column(Text, unique=True)
-# payment_status_detail: Mapped[str | None] = mapped_column(Text)
-# paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

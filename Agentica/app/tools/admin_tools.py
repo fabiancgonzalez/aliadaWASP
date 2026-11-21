@@ -106,8 +106,16 @@ async def actualizar_precio_o_stock_admin(
     motivo: str = "Actualización administrativa"
 ) -> str:
     """Modifica el precio o stock de un producto en PostgreSQL. REQUIERE APROBACIÓN HUMANA antes de ejecutarse."""
+    try:
+        producto_uuid = uuid.UUID(product_id)
+    except ValueError:
+        return (
+            f"Error: '{product_id}' no es un ID de producto válido. "
+            "Usá buscar_catalogo_productos para obtener el ID exacto (UUID) y reintentá."
+        )
+
     async with AsyncSessionLocal() as session:
-        stmt = select(Product).where(Product.id == uuid.UUID(product_id))
+        stmt = select(Product).where(Product.id == producto_uuid)
         producto = (await session.execute(stmt)).scalar_one_or_none()
         
         if not producto:

@@ -46,8 +46,16 @@ async def crear_pedido_pendiente(
     if quantity <= 0:
         return "Error: La cantidad debe ser mayor a 0."
 
+    try:
+        producto_uuid = uuid.UUID(product_id)
+    except ValueError:
+        return (
+            f"Error: '{product_id}' no es un ID de producto válido. "
+            "Usá buscar_catalogo_productos para obtener el ID exacto (UUID) del producto y reintentá la orden."
+        )
+
     async with AsyncSessionLocal() as session:
-        stmt = select(Product).where(Product.id == uuid.UUID(product_id), Product.active == True)
+        stmt = select(Product).where(Product.id == producto_uuid, Product.active == True)
         result = await session.execute(stmt)
         producto = result.scalar_one_or_none()
 
